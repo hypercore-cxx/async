@@ -18,5 +18,5 @@ Async<string> foobar () {
 }
 
 auto p = foobar();
-auto v = p.get(); // v == 42
+auto v = p.get(); // v == "bazz"
 ```
