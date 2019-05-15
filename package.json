@@ -1,0 +1,28 @@
+{
+  "name": "",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:datcxx/cxx-async.git"
+  },
+  "dependencies": {},
+  "license": "MIT",
+  "scripts": {
+    "test": [
+      "c++",
+      "-std=c++2a -fcoroutines-ts",
+      "test/index.cxx -o test/index && ./test/index"
+    ],
+    "install": ""
+  },
+  "flags": [
+    "-std=c++2a",
+    "-fcoroutines-ts"
+  ],
+  "files": [
+    "index.hxx"
+  ],
+  "devDependencies": {
+    "git@github.com:heapwolf/cxx-tap": "07821de0"
+  }
+}
