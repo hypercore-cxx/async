@@ -16,6 +16,10 @@ int main() {
     using namespace std::chrono;
 
     auto answer = []() -> Async<int> {
+      //
+      // for fun let's do something async in here
+      // using std::async, wait, get and return.
+      //
       auto a = std::async(std::launch::async, [&] {
         std::this_thread::sleep_for(seconds(2));
         return 42;
@@ -47,17 +51,17 @@ int main() {
     Hypercore::Promise<int> p;
     Util::Timeout timeout;
 
-    int order[3];
+    std::vector<int> order;
 
-    order[0] = 0;
+    order.push_back(0);
 
     timeout.start([&] {
-      order[2] = 2;
+      order.push_back(2);
       t->ok(true, "promise resolved from timer thread");
       p.resolve(42);
     }, 512);
 
-    order[1] = 1;
+    order.push_back(1);
 
     auto v = p.await();
 
