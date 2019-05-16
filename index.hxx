@@ -1,62 +1,115 @@
 #ifndef HYPERCORE_ASYNC_H
 #define HYPERCORE_ASYNC_H
 
+#include <future>
 #include <experimental/coroutine>
 
-template<typename T> struct Async {
-  std::shared_ptr<T> value;
+namespace Hypercore {
+  template<typename T> struct Async {
+    struct promise_type;
+    using handle_type = std::experimental::coroutine_handle<promise_type>;
+    handle_type coro;
 
-  // Created
-  Async(std::shared_ptr<T> p) : value(p) {}
+    Async(handle_type h) : coro(h) {}
 
-  // Copied
-  Async(const Async &s) : value(s.value) {}
-
-  ~Async() {}
-
-  // Ask for a return value
-  T get() {
-    return *value;
-  }
-
-  //
-  // An async class must describe the promise type with a `promise_type`
-  // struct. This struct contains the life-cycle methods for the promise.
-  //
-  struct promise_type {
-    std::shared_ptr<T> ptr;
-
-    // Promise Constructed
-    promise_type() : ptr(std::make_shared<T>()) {}
-
-    // Promise Destructed
-    ~promise_type() {}
-
-    // Value to return
-    auto get_return_object() {
-      return ptr;
+    Async(const Async &) = delete;
+    Async(Async &&s) : coro(s.coro) {
+      s.coro = nullptr;
     }
 
-    // Coro start
-    auto initial_suspend() {
-      return std::experimental::suspend_never {};
+    ~Async() {
+      if (coro) {
+        coro.destroy();
+      }
     }
 
-    // Coro return value 
-    auto return_value(T v) {
-      *ptr = v;
-      return std::experimental::suspend_never {};
+    Async &operator = (const Async &) = delete;
+    Async &operator = (Async &&s) {
+      coro = s.coro;
+      s.coro = nullptr;
+      return *this;
     }
 
-    // Coro ended
-    auto final_suspend() {
-      return std::experimental::suspend_never {};
+    T get() {
+      if (!this->coro.done()) {
+        this->coro.resume();
+      }
+
+      auto p = coro.promise();
+      return p.value;
     }
 
-    void unhandled_exception() {
-      std::exit(1);
+    auto operator co_await() {
+      struct awaitable_type {
+        handle_type coro;
+
+        bool await_ready() {
+          const auto ready = coro.done();
+          return coro.done();
+        }
+
+        void await_suspend(std::experimental::coroutine_handle<> awaiting) {
+          coro.resume();
+          awaiting.resume();
+        }
+
+        auto await_resume() {
+          const auto r = coro.promise().value;
+          return r;
+        }
+      };
+
+      return awaitable_type{coro};
+    }
+
+
+    struct promise_type {
+      T value;
+
+      promise_type() {}
+      ~promise_type() {}
+
+      auto get_return_object() {
+        return Async<T>{handle_type::from_promise(*this)};
+      }
+
+      // lazy, not lazy
+      auto initial_suspend() {
+        // return std::experimental::suspend_never{};
+        return std::experimental::suspend_always{};
+      }
+
+      auto return_value(T v) {
+        value = v;
+        return std::experimental::suspend_never{};
+      }
+
+      auto final_suspend() {
+        return std::experimental::suspend_always{};
+      }
+
+      void unhandled_exception() {
+        std::exit(1);
+      }
+    };
+  };
+
+  template<typename T> struct Promise {
+    std::promise<T> p;
+    std::shared_future<T> f;
+
+    T await () {
+      return f.get();
+    }
+
+    void resolve (T val) {
+      p.set_value(val);
+    }
+
+    Promise () {
+      this->f = p.get_future();
     }
   };
-};
+} // namespace Hypercore
 
 #endif

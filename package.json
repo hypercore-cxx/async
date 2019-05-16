@@ -5,7 +5,9 @@
     "type": "git",
     "url": "git@github.com:datcxx/cxx-async.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "git@github.com:datcxx/cxx-timers": "7d2ff2b7"
+  },
   "license": "MIT",
   "scripts": {
     "test": [
