@@ -34,6 +34,8 @@ auto question = []() -> Async<int> {
 auto v = question().get(); // v == 42
 ```
 
+Refer to [this][0] paper for specifics about coroutines in C++.
+
 # PROMISE
 ```c++
 Promise<int> p;
@@ -45,3 +47,5 @@ timeout.start([&] {
 
 auto v = p.await(); // blocks until resolved is called.
 ```
+
+[0]:https://isocpp.org/files/papers/N4663.pdf
