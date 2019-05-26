@@ -12,7 +12,7 @@ int main() {
   });
 
   t.test("await", [] (auto t) {
-    using namespace Hypercore;
+    using namespace Hyper::Util;
     using namespace std::chrono;
 
     auto answer = []() -> Async<int> {
@@ -48,7 +48,7 @@ int main() {
   });
 
   t.test("promise", [] (auto t) {
-    Hypercore::Promise<int> p;
+    Hyper::Util::Promise<int> p;
     Util::Timeout timeout;
 
     std::vector<int> order;

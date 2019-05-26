@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "async",
+  "description": "Provides coroutine-based async/await and minimal promises.",
   "repository": {
     "type": "git",
     "url": "git@github.com:datcxx/cxx-async.git"
@@ -11,15 +11,16 @@
   "license": "MIT",
   "scripts": {
     "test": [
-      "c++",
-      "-std=c++2a -fcoroutines-ts",
+      "clang++ -stdlib=libc++ -std=c++2a",
+      "-fcoroutines-ts -lpthread",
       "test/index.cxx -o test/index && ./test/index"
     ],
     "install": ""
   },
   "flags": [
     "-std=c++2a",
-    "-fcoroutines-ts"
+    "-fcoroutines-ts",
+    "-O3"
   ],
   "files": [
     "index.hxx"
